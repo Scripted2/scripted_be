@@ -9,7 +9,7 @@ class Video(models.Model):
     Video model to store video details.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    url = models.FileField(upload_to=PathAndName('videos/'), unique=True)
+    video_file = models.FileField(upload_to=PathAndName('videos/'), unique=True)
     file_hash = models.CharField(max_length=64, unique=True)
     title = models.CharField(max_length=255)
     description = models.TextField()

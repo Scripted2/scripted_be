@@ -62,7 +62,7 @@ class VideoView(viewsets.ViewSet):
             data = {
                 'title': request.data.get('title'),
                 'description': request.data.get('description'),
-                'url': request.FILES.get('file'),
+                'video_file': request.FILES.get('file'),
                 'duration': duration,
                 'file_hash': video_hash,
                 'user': request.user.id

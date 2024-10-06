@@ -47,17 +47,28 @@ class VideoView(viewsets.ViewSet):
             video_hash = file_hash(video_file)
             existing_video = Video.objects.filter(file_hash=video_hash).first()
             if existing_video:
-                return Response(
-                    {'message': 'This video already exists.',
-                     'video': VideoSerializer(existing_video, context={'request': request}).data},
-                    status=status.HTTP_200_OK)
-
-            try:
-                with VideoFileClip(video_file.temporary_file_path()) as clip:
-                    duration = clip.duration
-            except Exception as e:
-                print(f"Error processing video file: {e}")
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                data = {
+                    'title': request.data.get('title'),
+                    'description': request.data.get('description'),
+                    'video_file': existing_video.video_file,
+                    'duration': existing_video.duration,
+                    'file_hash': video_hash,
+                    'user': request.user.id
+                }
+                serializer = VideoSerializer(data=data, context={'request': request})
+                if serializer.is_valid():
+                    video = serializer.save()
+                    response_data = VideoSerializer(video).data
+                    return Response({'message': 'New entry created using existing video.', 'video': response_data},
+                                    status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                try:
+                    with VideoFileClip(video_file.temporary_file_path()) as clip:
+                        duration = clip.duration
+                except Exception as e:
+                    print(f"Error processing video file: {e}")
+                    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             data = {
                 'title': request.data.get('title'),

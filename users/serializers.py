@@ -5,15 +5,33 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from users.models import User, CodeSnippet, Category
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for category model.
+    """
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for user model.
     """
     confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    favorite_categories = CategorySerializer(many=True, read_only=True)
+    favorite_categories_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        many=True,
+        write_only=True,
+        source='favorite_categories'
+    )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'email', 'password', 'confirm_password', 'favorite_categories')
+        fields = ('first_name', 'last_name', 'username', 'email', 'password', 'confirm_password', 'favorite_categories',
+                  'favorite_categories_ids')
         extra_kwargs = {
             'password': {'write_only': True},
             'favorite_categories': {'required': True}
@@ -27,10 +45,9 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         favorite_categories_data = validated_data.pop('favorite_categories', None)
         validated_data.pop('confirm_password', None)
-        with transaction.atomic():
-            user = User.objects.create_user(**validated_data)
-            if favorite_categories_data:
-                user.favorite_categories.set(favorite_categories_data)
+        user = User.objects.create_user(**validated_data)
+        if favorite_categories_data:
+            user.favorite_categories.set(favorite_categories_data)
         return user
 
 
@@ -42,16 +59,6 @@ class CodeSnippetSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodeSnippet
         fields = ('title', 'code', 'language', 'created_by', 'created_at', 'updated_at')
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    """
-    Serializer for category model.
-    """
-
-    class Meta:
-        model = Category
-        fields = '__all__'
 
 
 class LoginProfileSerializer(UserSerializer):

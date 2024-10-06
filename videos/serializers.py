@@ -6,4 +6,5 @@ class VideoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = ['title', 'description', 'view_count', 'like_count', 'duration', 'url', 'created_at', 'user']
+        fields = ['title', 'description', 'view_count', 'like_count', 'duration', 'url', 'created_at']
+        read_only_fields = ['user']  # Make user read-only

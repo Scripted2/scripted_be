@@ -4,4 +4,3 @@ from users.views import SignUpViewSet
 
 users_router = DefaultRouter()
 users_router.register(r'signup', SignUpViewSet, basename='signup')
-users_router.register(r'login', SignUpViewSet, basename='login')

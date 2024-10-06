@@ -9,7 +9,7 @@ from rest_framework.viewsets import ViewSet
 from .models import Video
 from .serializers import VideoSerializer
 
-class VideoSearchView(viewsets.ViewSet):
+class VideoView(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):

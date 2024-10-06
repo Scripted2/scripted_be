@@ -7,6 +7,10 @@ from users.serializers import UserSerializer, CustomTokenObtainPairSerializer
 
 
 class SignUpViewSet(viewsets.ViewSet):
+    """
+    ViewSet for user signup.
+    """
+
     def create(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -16,4 +20,7 @@ class SignUpViewSet(viewsets.ViewSet):
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    Custom view for token obtain pair.
+    """
     serializer_class = CustomTokenObtainPairSerializer

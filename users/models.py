@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    """
+    Custom user model with email as the unique identifier.
+    """
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
@@ -26,6 +29,9 @@ class User(AbstractUser):
 
 
 class UserCategory(models.Model):
+    """
+    Intermediate model for user's favorite categories.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
 
@@ -34,6 +40,9 @@ class UserCategory(models.Model):
 
 
 class UserFollowers(models.Model):
+    """
+    Intermediate model for user's followers.
+    """
     user_from = models.ForeignKey(User, related_name='following_relationships', on_delete=models.CASCADE)
     user_to = models.ForeignKey(User, related_name='follower_relationships', on_delete=models.CASCADE)
 
@@ -42,6 +51,9 @@ class UserFollowers(models.Model):
 
 
 class UserFollowing(models.Model):
+    """
+    Intermediate model for user's following.
+    """
     user_from = models.ForeignKey(User, related_name='follower_relationships_set', on_delete=models.CASCADE)
     user_to = models.ForeignKey(User, related_name='following_relationships_set', on_delete=models.CASCADE)
 
@@ -50,6 +62,9 @@ class UserFollowing(models.Model):
 
 
 class Category(models.Model):
+    """
+    Model for the categories.
+    """
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -60,6 +75,9 @@ class Category(models.Model):
 
 
 class CodeSnippet(models.Model):
+    """
+    Model for the code snippets.
+    """
     title = models.CharField(max_length=255)
     code = models.TextField()
     language = models.CharField(max_length=255, blank=True, null=True)

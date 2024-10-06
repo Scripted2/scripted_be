@@ -5,6 +5,9 @@ from users.models import User, CodeSnippet, Category
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user model.
+    """
     confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
@@ -30,23 +33,39 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CodeSnippetSerializer(serializers.ModelSerializer):
+    """
+    Serializer for code snippet model.
+    """
+
     class Meta:
         model = CodeSnippet
         fields = ('title', 'code', 'language', 'created_by', 'created_at', 'updated_at')
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for category model.
+    """
+
     class Meta:
         model = Category
         fields = 'name'
 
 
 class LoginProfileSerializer(UserSerializer):
+    """
+    Serializer for user profile.
+    """
+
     def to_representation(self, instance):
         return serializers.ModelSerializer.to_representation(self, instance)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Custom token obtain pair serializer.
+    """
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)

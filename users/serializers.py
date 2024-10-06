@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -24,11 +25,12 @@ class UserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        favorite_categories_data = validated_data.pop('favorite_categories')
+        favorite_categories_data = validated_data.pop('favorite_categories', None)
         validated_data.pop('confirm_password', None)
-        user = User.objects.create_user(**validated_data)
-        if favorite_categories_data:
-            user.favorite_categories.set(favorite_categories_data)
+        with transaction.atomic():
+            user = User.objects.create_user(**validated_data)
+            if favorite_categories_data:
+                user.favorite_categories.set(favorite_categories_data)
         return user
 
 
@@ -49,7 +51,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = 'name'
+        fields = '__all__'
 
 
 class LoginProfileSerializer(UserSerializer):

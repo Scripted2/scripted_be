@@ -13,7 +13,6 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.registry.extend(users_router.registry)
 router.registry.extend(videos_router.registry)
 
-
 api_urlpatterns = [
     path('', include(router.urls)),
     path('token', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -1,8 +1,12 @@
 from django.conf import settings
 from django.db import models
 
+
 class Video(models.Model):
-    url = models.FileField(upload_to='videos/') # Changed to filefield so u can upload videos
+    """
+    Video model to store video details.
+    """
+    url = models.FileField(upload_to='videos/')
     title = models.CharField(max_length=255)
     description = models.TextField()
     view_count = models.BigIntegerField(default=0)

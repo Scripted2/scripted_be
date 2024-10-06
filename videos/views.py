@@ -9,7 +9,11 @@ from rest_framework.viewsets import ViewSet
 from .models import Video
 from .serializers import VideoSerializer
 
+
 class VideoView(viewsets.ViewSet):
+    """
+    Video view to list and create videos.
+    """
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
@@ -26,20 +30,15 @@ class VideoView(viewsets.ViewSet):
         elif selected_difficulty == 'hard':
             videos = videos.filter(duration__gte=120)
 
-
         if selected_category_ids:
             query = Q()
             for category_id in selected_category_ids:
-
                 query |= Q(title__icontains=category_id) | Q(description__icontains=category_id)
-
 
             videos = videos.filter(query).distinct()
 
-
         if sort_by == 'mostRecent':
             videos = videos.order_by('-created_at')
-
 
         video_data = [VideoSerializer(video).data for video in videos]
         return Response(video_data)
@@ -48,9 +47,8 @@ class VideoView(viewsets.ViewSet):
         serializer = VideoSerializer(data=request.data, context={'request': request})
 
         if serializer.is_valid():
-            video = serializer.save(user=request.user)  # Save the video instance
+            video = serializer.save(user=request.user)
 
-            # Prepare user information as a dictionary
             user_info = {
                 'id': request.user.id,
                 'first_name': request.user.first_name,
@@ -59,12 +57,11 @@ class VideoView(viewsets.ViewSet):
                 'email': request.user.email,
             }
 
-            # Combine video and user info in the response
-            response_data = VideoSerializer(video).data  # Serialize the video instance
-            response_data['user'] = user_info  # Include user info in the video dict
+            response_data = VideoSerializer(video).data
+            response_data['user'] = user_info
 
             return Response({
-                'video': response_data  # Return video and user information together
+                'video': response_data
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

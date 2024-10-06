@@ -1,7 +1,7 @@
 from django.db import models
 
 class Video(models.Model):
-    url = models.CharField(max_length=255, null=False, default='')
+    url = models.FileField(upload_to='videos/') # Changed to filefield so u can upload videos
     title = models.CharField(max_length=255)
     description = models.TextField()
     view_count = models.BigIntegerField(default=0)
@@ -10,3 +10,8 @@ class Video(models.Model):
     duration = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title

@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 
 from .models import Video
+from .name import file_hash
 from .serializers import VideoSerializer
 
 
@@ -43,6 +44,14 @@ class VideoView(viewsets.ViewSet):
     def create(self, request):
         video_file = request.FILES.get('file', None)
         if video_file:
+            video_hash = file_hash(video_file)
+            existing_video = Video.objects.filter(file_hash=video_hash).first()
+            if existing_video:
+                return Response(
+                    {'message': 'This video already exists.',
+                     'video': VideoSerializer(existing_video, context={'request': request}).data},
+                    status=status.HTTP_200_OK)
+
             try:
                 with VideoFileClip(video_file.temporary_file_path()) as clip:
                     duration = clip.duration
@@ -54,20 +63,16 @@ class VideoView(viewsets.ViewSet):
                 'title': request.data.get('title'),
                 'description': request.data.get('description'),
                 'url': request.FILES.get('file'),
-                'duration': duration
+                'duration': duration,
+                'file_hash': video_hash,
+                'user': request.user.id
             }
 
             serializer = VideoSerializer(data=data, context={'request': request})
             if serializer.is_valid():
                 video = serializer.save()
                 response_data = VideoSerializer(video).data
-                response_data['user'] = {
-                    'id': request.user.id,
-                    'first_name': request.user.first_name,
-                    'last_name': request.user.last_name,
-                    'username': request.user.username,
-                    'email': request.user.email,
-                }
                 return Response({'video': response_data}, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'No video file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'No video file provided'}, status=status.HTTP_400_BAD_REQUEST)

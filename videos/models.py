@@ -1,13 +1,16 @@
 from django.conf import settings
 from django.db import models
 
+from videos.name import PathAndName
+
 
 class Video(models.Model):
     """
     Video model to store video details.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    url = models.FileField(upload_to='videos/')
+    url = models.FileField(upload_to=PathAndName('videos/'), unique=True)
+    file_hash = models.CharField(max_length=64, unique=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     view_count = models.BigIntegerField(default=0)

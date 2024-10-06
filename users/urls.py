@@ -4,4 +4,4 @@ from users.views import SignUpViewSet, CategoriesViewSet
 
 users_router = DefaultRouter()
 users_router.register(r'signup', SignUpViewSet, basename='signup')
-users_router.register(r'category', CategoriesViewSet, basename='categories')
+users_router.register(r'category', CategoriesViewSet, basename='category')

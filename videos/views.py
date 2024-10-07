@@ -1,9 +1,11 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from rest_framework import status, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.decorators import action
 
+from scripted_be.utils import generic_like
 from .models import Video
 from .name import file_hash
 from .serializers import VideoSerializer
@@ -13,6 +15,7 @@ class VideoView(viewsets.ViewSet):
     """
     Video view to list and create videos.
     """
+
     def list(self, request):
         selected_category_ids = request.GET.getlist('categories')
         selected_difficulty = request.GET.get('difficulty')
@@ -40,14 +43,10 @@ class VideoView(viewsets.ViewSet):
         return Response(video_data)
 
     def retrieve(self, request, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
-
+        queryset = Video.objects.all()
+        video = get_object_or_404(queryset, pk=pk)
         video.view_count += 1
         video.save()
-
         serializer = VideoSerializer(video, context={'request': request})
         return Response(serializer.data)
 
@@ -88,10 +87,8 @@ class VideoView(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+        queryset = Video.objects.all()
+        video = get_object_or_404(queryset, pk=pk)
 
         if video.user != request.user:
             return Response({'error': 'You do not have permission to delete this video'},
@@ -101,25 +98,4 @@ class VideoView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        user = request.user
-
-        if user in video.liked_by.all():
-            video.liked_by.remove(user)
-            video.like_count -= 1
-            message = 'Unlike'
-        else:
-            video.liked_by.add(user)
-            video.like_count += 1
-            message = 'Like'
-
-        video.save()
-
-        return Response({
-            'message': message,
-            'like_count': video.like_count,
-        }, status=status.HTTP_200_OK)
+        return generic_like(request, Video, pk)

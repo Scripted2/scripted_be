@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.serializers import UserSerializer
+from users.serializers import ShortUserSerializer
 from .models import Video
 
 
@@ -8,7 +8,7 @@ class VideoSerializer(serializers.ModelSerializer):
     Video serializer to serialize video data, including like functionality.
     """
     duration = serializers.FloatField(required=False, allow_null=True, write_only=False)
-    user = UserSerializer(read_only=True)
+    user = ShortUserSerializer(read_only=True)
     is_liked_by_current_user = serializers.SerializerMethodField()
 
     class Meta:

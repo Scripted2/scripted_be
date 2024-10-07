@@ -1,8 +1,8 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from rest_framework.decorators import action
 
 from .models import Video
 from .name import file_hash
@@ -13,8 +13,6 @@ class VideoView(viewsets.ViewSet):
     """
     Video view to list and create videos.
     """
-    permission_classes = [IsAuthenticated]
-
     def list(self, request):
         selected_category_ids = request.GET.getlist('categories')
         selected_difficulty = request.GET.get('difficulty')
@@ -38,8 +36,20 @@ class VideoView(viewsets.ViewSet):
         if sort_by == 'mostRecent':
             videos = videos.order_by('-created_at')
 
-        video_data = [VideoSerializer(video).data for video in videos]
+        video_data = [VideoSerializer(video, context={'request': request}).data for video in videos]
         return Response(video_data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        video.view_count += 1
+        video.save()
+
+        serializer = VideoSerializer(video, context={'request': request})
+        return Response(serializer.data)
 
     def create(self, request):
         video_file = request.FILES.get('file', None)
@@ -76,3 +86,40 @@ class VideoView(viewsets.ViewSet):
             message = 'New entry created using existing video.' if existing_video else 'New video uploaded.'
             return Response({'message': message, 'video': response_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, pk=None):
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if video.user != request.user:
+            return Response({'error': 'You do not have permission to delete this video'},
+                            status=status.HTTP_403_FORBIDDEN)
+        video.delete()
+        return Response({'message': 'Video deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['POST'], url_path='like')
+    def like(self, request, pk=None):
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+
+        if user in video.liked_by.all():
+            video.liked_by.remove(user)
+            video.like_count -= 1
+            message = 'Unlike'
+        else:
+            video.liked_by.add(user)
+            video.like_count += 1
+            message = 'Like'
+
+        video.save()
+
+        return Response({
+            'message': message,
+            'like_count': video.like_count,
+        }, status=status.HTTP_200_OK)

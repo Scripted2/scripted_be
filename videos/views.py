@@ -3,6 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from rest_framework.decorators import action
 
 from .models import Video
 from .name import file_hash
@@ -76,3 +77,28 @@ class VideoView(viewsets.ViewSet):
             message = 'New entry created using existing video.' if existing_video else 'New video uploaded.'
             return Response({'message': message, 'video': response_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['POST'], url_path='like')
+    def like(self, request, pk=None):
+        """
+        Handle liking/unliking a video.
+        """
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+
+        if user in video.liked_by.all():
+            # User has already liked the video, so we remove the like (unlike)
+            video.liked_by.remove(user)
+            video.like_count -= 1
+            video.save()
+            return Response({'message': 'Video unliked', 'like_count': video.like_count}, status=status.HTTP_200_OK)
+        else:
+            # Add like
+            video.liked_by.add(user)
+            video.like_count += 1
+            video.save()
+            return Response({'message': 'Video liked', 'like_count': video.like_count}, status=status.HTTP_200_OK)

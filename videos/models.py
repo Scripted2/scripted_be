@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from proglog.proglog import SETTINGS
 
 from videos.name import PathAndName
 
@@ -15,7 +16,7 @@ class Video(models.Model):
     description = models.TextField()
     view_count = models.BigIntegerField(default=0)
     like_count = models.BigIntegerField(default=0)
-    is_liked = models.BooleanField(default=False)
+    liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_videos', blank=True)
     duration = models.FloatField(null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

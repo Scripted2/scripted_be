@@ -91,14 +91,11 @@ class VideoView(viewsets.ViewSet):
         user = request.user
 
         if user in video.liked_by.all():
-            # User has already liked the video, so we remove the like (unlike)
             video.liked_by.remove(user)
             video.like_count -= 1
             video.save()
             return Response({'message': 'Video unliked', 'like_count': video.like_count}, status=status.HTTP_200_OK)
-        else:
-            # Add like
-            video.liked_by.add(user)
-            video.like_count += 1
-            video.save()
-            return Response({'message': 'Video liked', 'like_count': video.like_count}, status=status.HTTP_200_OK)
+        video.liked_by.add(user)
+        video.like_count += 1
+        video.save()
+        return Response({'message': 'Video liked', 'like_count': video.like_count}, status=status.HTTP_200_OK)

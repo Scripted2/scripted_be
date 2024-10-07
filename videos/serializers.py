@@ -13,9 +13,9 @@ class VideoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = ['title', 'description', 'view_count', 'like_count', 'duration', 'video_file',
+        fields = ['id', 'title', 'description', 'view_count', 'like_count', 'duration', 'video_file',
                   'created_at', 'updated_at', 'file_hash', 'user', 'is_liked_by_current_user']
-        read_only_fields = ['view_count', 'like_count', 'is_liked', 'is_liked_by_current_user']
+        read_only_fields = ['view_count', 'like_count', 'is_liked_by_current_user']
 
     def create(self, validated_data):
         user = self.context['request'].user

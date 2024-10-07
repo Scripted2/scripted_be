@@ -1,7 +1,6 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from rest_framework.decorators import action
 
@@ -14,8 +13,6 @@ class VideoView(viewsets.ViewSet):
     """
     Video view to list and create videos.
     """
-    permission_classes = [IsAuthenticated]
-
     def list(self, request):
         selected_category_ids = request.GET.getlist('categories')
         selected_difficulty = request.GET.get('difficulty')

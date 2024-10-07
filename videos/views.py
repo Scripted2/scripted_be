@@ -39,7 +39,8 @@ class VideoView(viewsets.ViewSet):
         if sort_by == 'mostRecent':
             videos = videos.order_by('-created_at')
 
-        video_data = [VideoSerializer(video).data for video in videos]
+        # Pass the request context to the serializer
+        video_data = [VideoSerializer(video, context={'request': request}).data for video in videos]
         return Response(video_data)
 
     def create(self, request):

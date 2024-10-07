@@ -1,5 +1,6 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from rest_framework import status, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.decorators import action
@@ -40,14 +41,10 @@ class VideoView(viewsets.ViewSet):
         return Response(video_data)
 
     def retrieve(self, request, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
-
+        queryset = Video.objects.all()
+        video = get_object_or_404(queryset, pk=pk)
         video.view_count += 1
         video.save()
-
         serializer = VideoSerializer(video, context={'request': request})
         return Response(serializer.data)
 

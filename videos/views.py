@@ -94,11 +94,20 @@ class VideoView(viewsets.ViewSet):
             # User has already liked the video, so we remove the like (unlike)
             video.liked_by.remove(user)
             video.like_count -= 1
-            video.save()
-            return Response({'message': 'Video unliked', 'like_count': video.like_count}, status=status.HTTP_200_OK)
+            message = 'Video unliked'
         else:
             # Add like
             video.liked_by.add(user)
             video.like_count += 1
-            video.save()
-            return Response({'message': 'Video liked', 'like_count': video.like_count}, status=status.HTTP_200_OK)
+            message = 'Video liked'
+
+        video.save()
+
+        # Serialize the updated video data
+        serializer = VideoSerializer(video, context={'request': request})
+
+        # Return full video data along with the like message
+        return Response({
+            'message': message,
+            'video': serializer.data  # Full video data including is_liked_by_current_user
+        }, status=status.HTTP_200_OK)

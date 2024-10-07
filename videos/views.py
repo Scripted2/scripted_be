@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.decorators import action
 
+from scripted_be.utils import generic_like
 from .models import Video
 from .name import file_hash
 from .serializers import VideoSerializer
@@ -97,23 +98,4 @@ class VideoView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        queryset = Video.objects.all()
-        video = get_object_or_404(queryset, pk=pk)
-
-        user = request.user
-
-        if user in video.liked_by.all():
-            video.liked_by.remove(user)
-            video.like_count -= 1
-            message = 'Unlike'
-        else:
-            video.liked_by.add(user)
-            video.like_count += 1
-            message = 'Like'
-
-        video.save()
-
-        return Response({
-            'message': message,
-            'like_count': video.like_count,
-        }, status=status.HTTP_200_OK)
+        return generic_like(request, Video, pk)

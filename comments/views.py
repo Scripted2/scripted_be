@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from comments.models import Comment
 from comments.serializers import CommentSerializer
+from scripted_be.utils import generic_like
 
 
 class CommentView(viewsets.ViewSet):
@@ -37,23 +38,4 @@ class CommentView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        queryset = Comment.objects.all()
-        comment = get_object_or_404(queryset, pk=pk)
-
-        user = request.user
-
-        if user in comment.liked_by.all():
-            comment.liked_by.remove(user)
-            comment.like_count -= 1
-            message = 'Unlike'
-        else:
-            comment.liked_by.add(user)
-            comment.like_count += 1
-            message = 'Like'
-
-        comment.save()
-
-        return Response({
-            'message': message,
-            'like_count': comment.like_count
-        }, status=status.HTTP_200_OK)
+        return generic_like(request, Comment, pk)

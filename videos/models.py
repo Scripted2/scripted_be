@@ -1,22 +1,24 @@
 from django.conf import settings
 from django.db import models
 
+from videos.name import PathAndName
+
 
 class Video(models.Model):
     """
     Video model to store video details.
     """
-    url = models.FileField(upload_to='videos/')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    video_file = models.FileField(upload_to=PathAndName('videos/'))
+    file_hash = models.CharField(max_length=64)
     title = models.CharField(max_length=255)
     description = models.TextField()
     view_count = models.BigIntegerField(default=0)
     like_count = models.BigIntegerField(default=0)
     is_liked = models.BooleanField(default=False)
-    duration = models.IntegerField()
+    duration = models.FloatField(null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title

@@ -1,12 +1,11 @@
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from rest_framework import status, viewsets
-from rest_framework.decorators import permission_classes
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from rest_framework.viewsets import ViewSet
 
 from .models import Video
+from .name import file_hash
 from .serializers import VideoSerializer
 
 
@@ -34,7 +33,6 @@ class VideoView(viewsets.ViewSet):
             query = Q()
             for category_id in selected_category_ids:
                 query |= Q(title__icontains=category_id) | Q(description__icontains=category_id)
-
             videos = videos.filter(query).distinct()
 
         if sort_by == 'mostRecent':
@@ -44,24 +42,37 @@ class VideoView(viewsets.ViewSet):
         return Response(video_data)
 
     def create(self, request):
-        serializer = VideoSerializer(data=request.data, context={'request': request})
+        video_file = request.FILES.get('file', None)
+        if not video_file:
+            return Response({'error': 'No video file provided'}, status=status.HTTP_400_BAD_REQUEST)
 
+        video_hash = file_hash(video_file)
+        existing_video = Video.objects.filter(file_hash=video_hash).first()
+
+        if existing_video:
+            video_file = existing_video.video_file
+            duration = existing_video.duration
+        else:
+            try:
+                with VideoFileClip(video_file.temporary_file_path()) as clip:
+                    duration = clip.duration
+            except Exception as e:
+                print(f"Error processing video file: {e}")
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'title': request.data.get('title'),
+            'description': request.data.get('description'),
+            'video_file': video_file,
+            'duration': duration,
+            'file_hash': video_hash,
+            'user': request.user.id
+        }
+
+        serializer = VideoSerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            video = serializer.save(user=request.user)
-
-            user_info = {
-                'id': request.user.id,
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-                'username': request.user.username,
-                'email': request.user.email,
-            }
-
+            video = serializer.save()
             response_data = VideoSerializer(video).data
-            response_data['user'] = user_info
-
-            return Response({
-                'video': response_data
-            }, status=status.HTTP_201_CREATED)
-
+            message = 'New entry created using existing video.' if existing_video else 'New video uploaded.'
+            return Response({'message': message, 'video': response_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

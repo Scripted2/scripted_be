@@ -23,9 +23,6 @@ class VideoSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_liked_by_current_user(self, obj):
-        """
-        Returns whether the current user has liked the video.
-        """
         request = self.context.get('request', None)
         if request and request.user.is_authenticated:
             return obj.liked_by.filter(id=request.user.id).exists()

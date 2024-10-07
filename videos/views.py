@@ -39,9 +39,20 @@ class VideoView(viewsets.ViewSet):
         if sort_by == 'mostRecent':
             videos = videos.order_by('-created_at')
 
-        # Pass the request context to the serializer
         video_data = [VideoSerializer(video, context={'request': request}).data for video in videos]
         return Response(video_data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        video.view_count += 1
+        video.save()
+
+        serializer = VideoSerializer(video, context={'request': request})
+        return Response(serializer.data)
 
     def create(self, request):
         video_file = request.FILES.get('file', None)
@@ -79,11 +90,20 @@ class VideoView(viewsets.ViewSet):
             return Response({'message': message, 'video': response_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def destroy(self, request, *args, pk=None):
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if video.user != request.user:
+            return Response({'error': 'You do not have permission to delete this video'},
+                            status=status.HTTP_403_FORBIDDEN)
+        video.delete()
+        return Response({'message': 'Video deleted'}, status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        """
-        Handle liking/unliking a video.
-        """
         try:
             video = Video.objects.get(pk=pk)
         except Video.DoesNotExist:
@@ -92,23 +112,17 @@ class VideoView(viewsets.ViewSet):
         user = request.user
 
         if user in video.liked_by.all():
-            # User has already liked the video, so we remove the like (unlike)
             video.liked_by.remove(user)
             video.like_count -= 1
-            message = 'Video unliked'
+            message = 'Unlike'
         else:
-            # Add like
             video.liked_by.add(user)
             video.like_count += 1
-            message = 'Video liked'
+            message = 'Like'
 
         video.save()
 
-        # Serialize the updated video data
-        serializer = VideoSerializer(video, context={'request': request})
-
-        # Return full video data along with the like message
         return Response({
             'message': message,
-            'video': serializer.data  # Full video data including is_liked_by_current_user
+            'like_count': video.like_count,
         }, status=status.HTTP_200_OK)

@@ -37,10 +37,8 @@ class CommentView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        try:
-            comment = Comment.objects.get(pk=pk)
-        except Comment.DoesNotExist:
-            return Response({'error': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
+        queryset = Comment.objects.all()
+        comment = get_object_or_404(queryset, pk=pk)
 
         user = request.user
 

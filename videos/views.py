@@ -14,6 +14,7 @@ class VideoView(viewsets.ViewSet):
     """
     Video view to list and create videos.
     """
+
     def list(self, request):
         selected_category_ids = request.GET.getlist('categories')
         selected_difficulty = request.GET.get('difficulty')
@@ -85,10 +86,8 @@ class VideoView(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+        queryset = Video.objects.all()
+        video = get_object_or_404(queryset, pk=pk)
 
         if video.user != request.user:
             return Response({'error': 'You do not have permission to delete this video'},
@@ -98,10 +97,8 @@ class VideoView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='like')
     def like(self, request, pk=None):
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+        queryset = Video.objects.all()
+        video = get_object_or_404(queryset, pk=pk)
 
         user = request.user
 

@@ -10,10 +10,13 @@ from users.urls import users_router
 from users.views import CustomTokenObtainPairView
 from videos.urls import videos_router
 
+from category.urls import category_router
+
 router = routers.SimpleRouter(trailing_slash=False)
 router.registry.extend(users_router.registry)
 router.registry.extend(videos_router.registry)
 router.registry.extend(comments_router.registry)
+router.registry.extend(category_router.registry)
 
 api_urlpatterns = [
     path('', include(router.urls)),

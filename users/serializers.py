@@ -1,18 +1,9 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import User, CodeSnippet, Category
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    """
-    Serializer for category model.
-    """
-
-    class Meta:
-        model = Category
-        fields = '__all__'
-
+from users.models import User, CodeSnippet
+from category.serializer import CategorySerializer
+from category.models import Category
 
 class UserSerializer(serializers.ModelSerializer):
     """

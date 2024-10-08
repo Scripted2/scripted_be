@@ -10,7 +10,7 @@ from scripted_be.utils import generic_like
 
 class CommentView(viewsets.ViewSet):
     """
-    Comment view to list, create, retrieve and delete comments.
+    Comment view to list, create, retrieve, delete, and reply to comments.
     """
 
     def list(self, request):
@@ -27,7 +27,19 @@ class CommentView(viewsets.ViewSet):
     def create(self, request):
         serializer = CommentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['POST'], url_path='reply')
+    def reply(self, request, pk=None):
+        """
+         Reply to a comment (this will be mapped to POST /comment/<comment_id>/reply/)
+        """
+        parent_comment = get_object_or_404(Comment, pk=pk)
+        serializer = CommentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(user=request.user, parent=parent_comment)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

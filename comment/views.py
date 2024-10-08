@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from comments.models import Comment
-from comments.serializers import CommentSerializer
+from comment.models import Comment
+from comment.serializers import CommentSerializer
 from scripted_be.utils import generic_like
 
 

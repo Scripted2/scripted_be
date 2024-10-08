@@ -5,10 +5,10 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from comments.urls import comments_router
+from comment.urls import comments_router
 from users.urls import users_router
 from users.views import CustomTokenObtainPairView
-from videos.urls import videos_router
+from video.urls import videos_router
 
 from category.urls import category_router
 

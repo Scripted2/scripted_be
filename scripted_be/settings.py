@@ -22,9 +22,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'videos',
+    'video',
     'users',
-    'comments',
+    'comment',
     'category',
 ]
 
@@ -115,7 +115,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'a_media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Default User model
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'user.User'
 
 # JWT TOKEN DURATION
 SIMPLE_JWT = {

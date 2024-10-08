@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from comments.models import Comment
+from comment.models import Comment
 from users.serializers import ShortUserSerializer
 
 

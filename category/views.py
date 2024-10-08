@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from category.models import Category
@@ -11,6 +12,8 @@ class CategoriesViewSet(viewsets.ViewSet):
     """
     ViewSet for categories.
     """
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def list(self, request):
         categories = Category.objects.all()

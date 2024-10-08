@@ -7,6 +7,7 @@ from comments.models import Comment
 from comments.serializers import CommentSerializer
 from scripted_be.utils import generic_like
 
+
 class CommentView(viewsets.ViewSet):
     """
     Comment view to list, create, retrieve, delete, and reply to comments.
@@ -32,9 +33,9 @@ class CommentView(viewsets.ViewSet):
 
     @action(detail=True, methods=['POST'], url_path='reply')
     def reply(self, request, pk=None):
-        '''
+        """
          Reply to a comment (this will be mapped to POST /comment/<comment_id>/reply/)
-        '''
+        """
         parent_comment = get_object_or_404(Comment, pk=pk)
         serializer = CommentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():

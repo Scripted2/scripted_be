@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from comments.models import Comment
 from users.serializers import ShortUserSerializer
@@ -22,8 +21,5 @@ class CommentSerializer(serializers.ModelSerializer):
         return False
 
     def get_replies(self, obj):
-        """
-        Get nested replies for a comment.
-        """
         replies = obj.replies.all()
         return CommentSerializer(replies, many=True, context=self.context).data

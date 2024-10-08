@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.serializers import UserSerializer, CustomTokenObtainPairSerializer
+from user.serializers import UserSerializer, CustomTokenObtainPairSerializer
 
 
 class SignUpViewSet(viewsets.ViewSet):

@@ -1,4 +1,3 @@
-from django.db import transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -40,6 +39,16 @@ class UserSerializer(serializers.ModelSerializer):
         if favorite_categories_data:
             user.favorite_categories.set(favorite_categories_data)
         return user
+
+
+class ShortUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for short user model.
+    """
+
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'username', 'email']
 
 
 class CodeSnippetSerializer(serializers.ModelSerializer):

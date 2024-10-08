@@ -5,13 +5,17 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from comments.urls import comments_router
 from users.urls import users_router
 from users.views import CustomTokenObtainPairView
+from videos.urls import videos_router
 
 from category.urls import category_router
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.registry.extend(users_router.registry)
+router.registry.extend(videos_router.registry)
+router.registry.extend(comments_router.registry)
 router.registry.extend(category_router.registry)
 
 api_urlpatterns = [

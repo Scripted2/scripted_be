@@ -3,16 +3,31 @@ from comments.models import Comment
 from users.serializers import ShortUserSerializer
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class ReplySerializer(serializers.ModelSerializer):
+    """
+    Reply serializer to serialize reply data.
+    """
     user = ShortUserSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'comment', 'user', 'like_count', 'created_at', 'updated_at']
+        read_only_fields = fields
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Comment serializer to serialize comment data, including like functionality.
+    """
+    user = ShortUserSerializer(read_only=True)
+    replies = ReplySerializer(many=True, read_only=True)
     is_liked_by_current_user = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = ['id', 'comment', 'video_id', 'user', 'is_liked_by_current_user', 'like_count', 'created_at',
                   'updated_at', 'parent', 'replies']
-        read_only_fields = ['like_count', 'created_at', 'updated_at', 'user', 'replies']
+        read_only_fields = ['user', 'like_count', 'created_at', 'updated_at', 'replies']
 
     def get_is_liked_by_current_user(self, obj):
         request = self.context.get('request', None)
@@ -21,5 +36,5 @@ class CommentSerializer(serializers.ModelSerializer):
         return False
 
     def get_replies(self, obj):
-        replies = obj.replies.all()
-        return CommentSerializer(replies, many=True, context=self.context).data
+        replies = Comment.objects.filter(parent=obj)
+        return ReplySerializer(replies, many=True).data

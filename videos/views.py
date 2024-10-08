@@ -16,7 +16,7 @@ class VideoView(viewsets.ViewSet):
     Video view to list and create videos.
     """
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         selected_category_ids = request.GET.getlist('categories')
         selected_difficulty = request.GET.get('difficulty')
         sort_by = request.GET.get('sort_by')
@@ -81,7 +81,7 @@ class VideoView(viewsets.ViewSet):
         serializer = VideoSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             video = serializer.save()
-            response_data = VideoSerializer(video).data
+            response_data = VideoSerializer(video, context={'request': request}).data
             message = 'New entry created using existing video.' if existing_video else 'New video uploaded.'
             return Response({'message': message, 'video': response_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

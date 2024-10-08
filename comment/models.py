@@ -19,4 +19,4 @@ class Comment(models.Model):
         return self.comment
 
     class Meta:
-        db_table = 'comment'
+        db_table = 'comments'

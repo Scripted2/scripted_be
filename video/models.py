@@ -24,4 +24,4 @@ class Video(models.Model):
         return self.title
 
     class Meta:
-        db_table = 'video'
+        db_table = 'videos'

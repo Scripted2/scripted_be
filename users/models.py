@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from category.models import Category
 
 class User(AbstractUser):
     """
@@ -10,7 +11,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True, max_length=255)
-    favorite_categories = models.ManyToManyField('Category', through='UserCategory', related_name='users', blank=True)
+    favorite_categories = models.ManyToManyField('category.Category', through='UserCategory', related_name='users', blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     followers = models.ManyToManyField('self', through='UserFollowers', related_name='followed_by_this_user',
@@ -28,12 +29,13 @@ class User(AbstractUser):
         db_table = 'user'
 
 
+
 class UserCategory(models.Model):
     """
     Intermediate model for user's favorite categories.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    category = models.ForeignKey('category.Category', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'user_favorite_categories'
@@ -59,20 +61,6 @@ class UserFollowing(models.Model):
 
     class Meta:
         db_table = 'user_following'
-
-
-class Category(models.Model):
-    """
-    Model for the categories.
-    """
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = 'category'
-
 
 class CodeSnippet(models.Model):
     """

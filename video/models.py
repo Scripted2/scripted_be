@@ -2,8 +2,6 @@ from django.conf import settings
 from django.db import models
 
 from video.name import PathAndName
-
-
 class Video(models.Model):
     """
     Video model to store video details.

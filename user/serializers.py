@@ -79,10 +79,11 @@ class CodeSnippetSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
     created_at = serializers.ReadOnlyField()
     updated_at = serializers.ReadOnlyField()
+    image = serializers.ImageField(required=False, allow_empty_file=True)
 
     class Meta:
         model = CodeSnippet
-        fields = ['id', 'title', 'code', 'language', 'created_by', 'created_at', 'updated_at', 'like_count']
+        fields = ['id', 'title', 'code', 'language', 'created_by', 'created_at', 'updated_at', 'image', 'like_count']
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -92,5 +93,7 @@ class CodeSnippetSerializer(serializers.ModelSerializer):
         instance.title = validated_data.get('title', instance.title)
         instance.code = validated_data.get('code', instance.code)
         instance.language = validated_data.get('language', instance.language)
+        if 'image' in validated_data:
+            instance.image = validated_data['image']
         instance.save()
         return instance

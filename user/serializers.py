@@ -5,6 +5,7 @@ from user.models import User, CodeSnippet
 from category.serializer import CategorySerializer
 from category.models import Category
 
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for user model.
@@ -50,17 +51,6 @@ class ShortUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email']
 
-
-class CodeSnippetSerializer(serializers.ModelSerializer):
-    """
-    Serializer for code snippet model.
-    """
-
-    class Meta:
-        model = CodeSnippet
-        fields = ('title', 'code', 'language', 'created_by', 'created_at', 'updated_at')
-
-
 class LoginProfileSerializer(UserSerializer):
     """
     Serializer for user profile.
@@ -84,3 +74,23 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         data['user'] = LoginProfileSerializer(self.user).data
         return data
+
+class CodeSnippetSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    created_at = serializers.ReadOnlyField()
+    updated_at = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CodeSnippet
+        fields = ['id', 'title', 'code', 'language', 'created_by', 'created_at', 'updated_at', 'like_count']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        return CodeSnippet.objects.create(created_by=user, **validated_data)
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.code = validated_data.get('code', instance.code)
+        instance.language = validated_data.get('language', instance.language)
+        instance.save()
+        return instance

@@ -34,3 +34,5 @@ class VideoSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         comments = obj.comments.filter(parent=None)
         return CommentSerializer(comments, many=True, context={'request': self.context['request']}).data
+
+

@@ -6,7 +6,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from comment.urls import comments_router
-from user.urls import users_router
+from user.urls import users_router, snippets_router
 from user.views import CustomTokenObtainPairView
 from video.urls import videos_router
 
@@ -17,6 +17,7 @@ router.registry.extend(users_router.registry)
 router.registry.extend(videos_router.registry)
 router.registry.extend(comments_router.registry)
 router.registry.extend(categories_router.registry)
+router.registry.extend(snippets_router.registry)
 
 api_urlpatterns = [
     path('', include(router.urls)),

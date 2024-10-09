@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import User, CodeSnippet
+from user.models import User, CodeSnippet
 from category.serializer import CategorySerializer
 from category.models import Category
 

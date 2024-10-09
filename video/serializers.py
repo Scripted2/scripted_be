@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from comments.serializers import CommentSerializer
-from users.serializers import ShortUserSerializer
+from comment.serializers import CommentSerializer
+from user.serializers import ShortUserSerializer
 from .models import Video
 
 

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from category.models import Category
 
 class User(AbstractUser):
     """
@@ -26,7 +25,7 @@ class User(AbstractUser):
         return self.username
 
     class Meta:
-        db_table = 'user'
+        db_table = 'users'
 
 
 
@@ -77,4 +76,4 @@ class CodeSnippet(models.Model):
         return self.title
 
     class Meta:
-        db_table = 'code_snippet'
+        db_table = 'code_snippets'

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from videos.name import PathAndName
+from video.name import PathAndName
 
 
 class Video(models.Model):
@@ -24,4 +24,4 @@ class Video(models.Model):
         return self.title
 
     class Meta:
-        db_table = 'video'
+        db_table = 'videos'
